@@ -1,17 +1,53 @@
-# Solr-tools
+# Solr
 
-These instructions should help you set up your own instance of the
-Solr search engine and this repository provides some scripts to help
-import data into your new Solr instance.
+ - Quick introduction to Solr
+ - Steps to configure and setup Solr in IOP
+ - How it integrates with Hadoop HDFS
+ - Show how Solr works with an example
 
-## Install Solr
+## What is Solr? 
 
-As of this writing the newest version of Solr is 5.3, but you can
-check from the [Solr web site][1] if there is a newer version and
-change the commands below accordingly.
+Solr is a enterprise search server with REST-like interface. It manages documents such as JSON, XML, CSV, or binary files by indexing them to provide the capability to search those documents in a fraction of the time. Queries, including updates and other functions, can be managed through HTTP requests to receive results. 
 
-    wget http://www.nic.funet.fi/pub/mirrors/apache.org/lucene/solr/5.3.0/solr-5.3.0.tgz
-    tar xvf solr-5.3.0.tgz 
+Some features of Solr: 
+* advanced full text search capabilities
+* optimized for high volume traffic
+* based on standard interfaces (xml, json, HTTP)
+* admin interface
+* easy monitoring of metric data via JMX
+* scalable and fault tolerant via zookeeper
+* flexible and adaptable
+* near real-time indexing via Lucene
+* extensible plugin architecture
+
+Below we will provide a simple proof of concept in which the entire contents of wikipedia (14,000,000 documents) are indexed for query. This data can be found at the [wikipedia](https://en.wikipedia.org/wiki/Wikipedia:Database_download) data dump. The file used here is the pages-articles.xml.bz2 file- 13gb compressed, 61gb uncompressed. 
+
+## How to Install Solr on CentOS
+
+Solr is installed as part of the IBM open platform package (this document will make use of IOP 4.1.0.0). The version included in IOP is Solr 5.1.0. This version may be preferable for enterprise search versus standalone Solr as it is automatically configured for use with the Hadoop file system. 
+
+A guide to set up one node IOP can be found [here](http://cleverowl.uk/2015/10/22/installation-of-ibm-open-platform-with-apache-hadoop-version-4-1/). 
+
+As of this writing, Solr does not have a full admin interface through Ambari.
+
+![Ambari interface](https://raw.githubusercontent.com/kdallas2/solr-tools/master/iop41_install_14.png)
+
+What it does have is an interface for starting and stopping Solr only. Note, if Solr is instead started through terminal with "bin/solr start" it will not be preconfigured for index storage or data retrieval from HDFS. Starting the service through Ambari's interface will set directory factory to HdfsDirectoryFactory automatically. 
+
+Once the Solr service has been started, the web interface can be accessed through localhost:8983 (default port number). 
+
+## Configuring Solr to Index Wikipedia
+
+To start an index one must create a "core". In the web interface, this can be done through Core Admin. The core will represent the structure and configuration of your document index. Each core has four main configuration files that are required to run, and a fifth we will use to help us index wikipedia. These files are: 
+* solr.xml
+* core.properties
+* solrconfig.xml
+* schema.xml
+* data-config.xml (technically optional but provides the import handling function for our wikipedia xml file)
+
+#### solr.xml
+
+This is the highest level document that the Solr instance looks for. The contents can be as simple as an 
 
 ### Run Solr directly (Linux and OS X)
 
